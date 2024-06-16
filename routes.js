@@ -1,4 +1,5 @@
-const express = require("express");
+const { Router } = require("express");
+const router = Router();
 
 const {
     register,
@@ -11,4 +12,4 @@ const {
 
 
 
-module.exports = route;
+module.exports = router;
