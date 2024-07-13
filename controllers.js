@@ -185,10 +185,17 @@ async function getFinancialRecords(req, res) {
 async function updateFinancialRecord(req, res) {
     // Restructure all requests from req body
     const { title, amount, paymentMethod, date, category, description } = req.body;
-    console.log(req.body);
-
+    
     // Request the financial record id
     const { id } = req.params;
+
+    // Validation for the required fields
+    if (!req.body.paymentMethod) {
+        return res.status(400).send({ message: "Payment Method Required" });
+    }
+    if (!req.body.category) {
+        return res.status(400).send({ message: "Category Required" });
+    }
 
     try {
         // Find the financial record by id 
@@ -200,21 +207,36 @@ async function updateFinancialRecord(req, res) {
         if (!financialRecord) {
             return res.status(400).json({ error: "Financial Records Not Found!"})
         }
-
+        
         // Validate payment method if provided
         if (paymentMethod !== "") {
             if (!['credit', 'cash', 'debit', 'transfer', 'qris'].includes(paymentMethod.toLowerCase())) {
                 return res.status(400).send({ message: "Payment method must be either Credit, Cash, Debit, Transfer, or Qris"});
             }
         }
-
+        
         // Validate category if provided
         if (category !== "") {
+            console.log("masuk");
             if (!['income', 'expense'].includes(category.toLowerCase())) {
                 return res.status(400).send({ message: "Category must be either Income or Expense" });
             }
         } 
 
+        // Find category by type
+        const categoryRecord = await prisma.category.findFirst({
+            where: {
+                type: category ? { equals: category.toUpperCase() } : {}
+            }
+        });
+
+        console.log(categoryRecord, category);
+
+        // If category not found
+        if (!categoryRecord) {
+            return res.status(400).send({ message: "Invalid category" });
+        }
+        
         // Find payment methode by type
         const paymentMethodRecord = await prisma.paymentMethod.findFirst({
             where: {
@@ -225,18 +247,6 @@ async function updateFinancialRecord(req, res) {
         // If payment method not found
         if (!paymentMethodRecord) {
             return res.status(400).send({ message: "Invalid payment method" });
-        }
-
-        // Find category by type
-        const categoryRecord = await prisma.category.findFirst({
-            where: {
-                type: category ? { equals: category.toUpperCase() } : {}
-            }
-        });
-
-        // If category not found
-        if (!categoryRecord) {
-            return res.status(400).send({ message: "Invalid category" });
         }
 
         // Update financial record by id
