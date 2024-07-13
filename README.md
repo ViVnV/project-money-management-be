@@ -7,7 +7,7 @@ Table of Contents
 - [Usage](#usage)
 - [Features](#features)
 - [Contribution](#contribution)
-- [Contact Information](#contact-information
+- [Contact Information](#contact-information)
 
 
 ## Technologies
